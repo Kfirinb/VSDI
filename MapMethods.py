@@ -123,7 +123,24 @@ def Tmax(Z,responseSig,r_thresh,gaussSTD = 0):
 #===========================================================================#    
 ################################ CORR #######################################
 def Corr(Z,responseSig):
-    return
+responseSig = loadmat(r'responseSig.mat')
+responseSig = np.concatenate((responseSig["responseSig"][0],np.zeros(700)))
+theoreticalSigs = [np.roll(responseSig,100*i) for i in range(8)]
+corrArray = np.zeros((nrow,ncol,8))
+responseSources = np.zeros((nrow, ncol))
+responseSourcesIndexes = np.zeros((nrow, ncol))
+for i in range(nrow):
+    for j in range(ncol):
+        for m in range(8):
+         corrArray[i,j,m] = np.corrcoef(Z[i,j,100*m:100*(m+1)], theoreticalSigs[m][100*m:100*(m+1)])[1,0]
+for i in range(nrow):
+    for j in range(ncol):
+          responseSources[i,j] = np.max(corrArray[i,j,:])
+          responseSourcesIndexes[i,j] = np.argmax(corrArray[i,j,:])
+prctile = np.percentile(responseSources,95)
+responseSourcesIndexes[responseSources<prctile] = 0
+plt.imshow(responseSourcesIndexes) 
+     return
 ################################ END CORR ###################################
 #===========================================================================# 
 ################################ AOF #######################################
